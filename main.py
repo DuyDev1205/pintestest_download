@@ -41,6 +41,7 @@ def download_image(image_url, file_name):
 
 def final():
     options = Options()
+    #Hãy đổi đường dẫn lại để lưu profile của google chrome nha 
     options.add_argument("user-data-dir=D:\\VSCode\\Codeathon\\pintestest_download\\ChromeProfile")
     num = int(input("Số lượng ảnh cần tải: "))
     value = input("Nội dung cần tìm kiếm ")
@@ -73,6 +74,7 @@ def final():
     driver.quit()
 
 if __name__ == "__main__":
+    #ở đây cũng vậy, bạn hãy thay đổi lại đường dẫn để trõ vào mục Defaut để xóa catche , tránh nặng máy
     profile_path = 'D:\\VSCode\\Codeathon\\pintestest_download\\ChromeProfile\\Default'
     clear_chrome_profile_cache(profile_path)
     final()
