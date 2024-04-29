@@ -31,12 +31,10 @@ def wait_for_xpath_single(driver, xpath):
     return WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.XPATH, xpath))
     )
-
 def wait_for_xpath_all(driver, xpath):
     return WebDriverWait(driver, 10).until(
         EC.presence_of_all_elements_located((By.XPATH, xpath))
     )
-
 def download_image(image_url, file_name):
     response = requests.get(image_url)
     if response.status_code == 200:
@@ -44,13 +42,12 @@ def download_image(image_url, file_name):
             f.write(response.content)
         return True
     return False
-def show_image():
-    global path_list
+def show_image(path_list):
     for i in path_list:
         img=Image.open(i)
         img.show() 
         pyautogui.hotkey('alt', 'f4')
-def remove_image():
+def remove_image(path_list):
     for i in path_list:
         os.remove(i)
 def display_menu():
@@ -63,6 +60,20 @@ def display_menu():
     headers = ["Lựa chọn", "Chức năng"]
     menu = tabulate(menu_items, headers, tablefmt="fancy_outline",colalign=("center","center"))
     print(menu)
+def load_image_paths():
+    try:
+        with open('image_paths.txt', 'r') as file:
+            # Đọc mọi dòng từ file, mỗi dòng chứa một đường dẫn
+            path_list = file.readlines()
+            # Loại bỏ ký tự xuống dòng ở cuối mỗi đường dẫn
+            path_list = [path.strip() for path in path_list]
+            return path_list
+    except FileNotFoundError:
+        print("File 'image_paths.txt' không tồn tại.")
+        return []
+    except Exception as e:
+        print(f"Lỗi khi đọc file: {e}")
+        return []
 def final():
     options = Options()
     options.add_argument("user-data-dir="+os.path.join(os.getcwd(),f'ChromeProfile'))
@@ -78,30 +89,42 @@ def final():
 
     downloaded = 0
     images_processed = set()
-    global path_list
-    path_list =[]
+    try:
+        with open('image_paths.txt', 'r') as file:
+            existing_paths = {line.strip() for line in file.readlines()}
+    except FileNotFoundError:
+        existing_paths = set()
     while downloaded < num:
         images = wait_for_xpath_all(driver, '//img[@class="hCL kVc L4E MIw"]')
         for img in images[1:num+1]:
             src = img.get_attribute('src')
-            if src and src not in images_processed:
-                file_name = os.path.join(os.getcwd(), f'images/image_{downloaded + 1}.jpg')
+            file_name = os.path.join(os.getcwd(), f'images/image_{downloaded + 1}.jpg')
+            if src and src not in images_processed and file_name not in existing_paths:
                 if download_image(src, file_name):
                     downloaded += 1
                     images_processed.add(src)
+                    if file_name not in existing_paths:
+                        with open('image_paths.txt', 'a') as file:
+                            file.write(file_name + '\n')
+                            existing_paths.add(file_name)
                     if downloaded >= num:
                         break
+            else:
+                downloaded+=1
+                num+=1
         if downloaded < num:  # Chỉ cuộn trang khi cần thêm ảnh
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(3)  # Đợi ảnh mới tải về
     driver.quit()
-def output():
+def output(): 
     cls=os.system('cls')
     print(Color.GREEN)
     display_menu()
     while True:
+        path_list =load_image_paths()
         try:
                 choice = int(input("Nhập lựa chọn: "))
+                cls
         except ValueError:
             print("Vui lòng nhập một số hợp lệ.")
             continue
@@ -112,15 +135,12 @@ def output():
             case 1:
                 final()
             case 2:
-                show_image()
+                show_image(path_list)
             case 3:
-                remove_image()
+                remove_image(path_list)
 if __name__ == "__main__":
     path =os.path.join(os.getcwd(),f'ChromeProfile\\Default')
     clear_catche =os.path.join(os.getcwd(),f'ChromeProfile\\Default\\Cache')
     if os.path.exists(clear_catche):
         clear_chrome_profile_cache(path)
-    # final()
-    # show_image()
-    # remove_image()
     output()
