@@ -49,13 +49,18 @@ def show_image(path_list):
         pyautogui.hotkey('alt', 'f4')
 def remove_image(path_list):
     for i in path_list:
-        os.remove(i)
+        if os.path.exists(i):
+            os.remove(i)
+        else:
+            pass
+    open('image_paths.txt', 'w').close()
+    print("Đã xóa thành công")
 def display_menu():
     menu_items = [
         ["1", "Tải ảnh"],
         ["2", "Xem ảnh"],
         ["3", "Xóa ảnh"],
-        ["0", "Thoát"],
+        ["0", "Thoát"]
     ]
     headers = ["Lựa chọn", "Chức năng"]
     menu = tabulate(menu_items, headers, tablefmt="fancy_outline",colalign=("center","center"))
@@ -124,7 +129,6 @@ def output():
         path_list =load_image_paths()
         try:
                 choice = int(input("Nhập lựa chọn: "))
-                cls
         except ValueError:
             print("Vui lòng nhập một số hợp lệ.")
             continue
@@ -138,6 +142,7 @@ def output():
                 show_image(path_list)
             case 3:
                 remove_image(path_list)
+
 if __name__ == "__main__":
     path =os.path.join(os.getcwd(),f'ChromeProfile\\Default')
     clear_catche =os.path.join(os.getcwd(),f'ChromeProfile\\Default\\Cache')
