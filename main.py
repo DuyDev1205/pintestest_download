@@ -14,7 +14,6 @@ def clear_chrome_profile_cache(profile_path):
         os.path.join(profile_path, 'Code Cache'),  # Cache cho code
         os.path.join(profile_path, 'GPUCache')  # GPU cache
     ]
-
     for path in cache_paths:
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -41,8 +40,7 @@ def download_image(image_url, file_name):
 
 def final():
     options = Options()
-    #Hãy đổi đường dẫn lại để lưu profile của google chrome nha 
-    options.add_argument("user-data-dir=D:\\VSCode\\Codeathon\\pintestest_download\\ChromeProfile")
+    options.add_argument("user-data-dir="+os.path.join(os.getcwd(),f'ChromeProfile'))
     num = int(input("Số lượng ảnh cần tải: "))
     value = input("Nội dung cần tìm kiếm ")
     driver = webdriver.Chrome(options=options)
@@ -52,13 +50,12 @@ def final():
     tim_kiem.send_keys(value)
     tim_kiem.send_keys(Keys.ENTER)
     sleep(2)
-    
+
     downloaded = 0
     images_processed = set()
-
     while downloaded < num:
         images = wait_for_xpath_all(driver, '//img[@class="hCL kVc L4E MIw"]')
-        for img in images:
+        for img in images[1:num+1]:
             src = img.get_attribute('src')
             if src and src not in images_processed:
                 file_name = os.path.join(os.getcwd(), f'images/image_{downloaded + 1}.jpg')
@@ -70,11 +67,11 @@ def final():
         if downloaded < num:  # Chỉ cuộn trang khi cần thêm ảnh
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             sleep(3)  # Đợi ảnh mới tải về
-
     driver.quit()
 
 if __name__ == "__main__":
-    #ở đây cũng vậy, bạn hãy thay đổi lại đường dẫn để trõ vào mục Defaut để xóa catche , tránh nặng máy
-    profile_path = 'D:\\VSCode\\Codeathon\\pintestest_download\\ChromeProfile\\Default'
-    clear_chrome_profile_cache(profile_path)
+    path =os.path.join(os.getcwd(),f'ChromeProfile\\Default')
+    clear_catche =os.path.join(os.getcwd(),f'ChromeProfile\\Default\\Cache')
+    if os.path.exists(clear_catche):
+        clear_chrome_profile_cache(path)
     final()
