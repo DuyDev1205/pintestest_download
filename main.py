@@ -7,12 +7,12 @@ from selenium.webdriver.support import expected_conditions as EC
 import os
 import requests
 from time import sleep
+import keyboard
 import shutil
 from PIL import Image
 import pyautogui
 from tabulate import tabulate
 from termcolor import colored
-import json
 class Color:
     GREEN = '\033[92m'
 def clear_chrome_profile_cache(profile_path):
@@ -43,10 +43,27 @@ def download_image(image_url, file_name):
         return True
     return False
 def show_image(path_list):
+    quit_signal = False
+
+    def check_quit(event):
+        nonlocal quit_signal
+        if event.name == 'q':
+            quit_signal = True
+    keyboard.on_press(check_quit)
     for i in path_list:
-        img=Image.open(i)
-        img.show() 
+        img = Image.open(i)
+        img.show()
+        while True:
+            if quit_signal:
+                pyautogui.hotkey('alt', 'f4')
+                print("Thoát khỏi chương trình...")
+                keyboard.unhook_all()  # Gỡ bỏ tất cả các hook
+                raise SystemExit  # Thoát hoàn toàn khỏi chương trình
+            break
         pyautogui.hotkey('alt', 'f4')
+
+    # Gỡ bỏ hook khi hàm kết thúc
+    keyboard.unhook_all()
 def remove_image(path_list):
     for i in path_list:
         if os.path.exists(i):
